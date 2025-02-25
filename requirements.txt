@@ -1,2 +1,4 @@
 aiogram
 python-dotenv
+sqlalchemy
+psycopg2
