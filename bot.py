@@ -19,5 +19,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         text = 'Бот был Вами остановлен 🛑'
         print('-' * len(text))
-        print(f'\n{text}\n')
+        print(f'{text}')
         print('-' * len(text))

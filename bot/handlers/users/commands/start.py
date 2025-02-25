@@ -3,10 +3,22 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
+from db.psql.models.crud import UserChecker
+
 router = Router()
 
-# Обработчик команды /start с реферальным кодом
+# Команда start
 @router.message(Command("start"))
-async def start_handler(message: Message, state: FSMContext):
-    welcome_message = "Добро пожаловать! ☺️"
-    await message.answer(welcome_message)
+async def new_user_start(msg: Message, state: FSMContext):
+    
+    tg_id = msg.from_user.id
+    checker = UserChecker(tg_id)
+    
+    if checker.user_exists():
+        welcome_message = "Добро пожаловать, МОЙ ЛЮБИМЫЙ ПОЛЬЗОВАТЕЛЬ! ☺️"
+    else:
+        welcome_message = "Добро пожаловать, НОВЫЙ ПОЛЬЗОВАТЕЛЬ! ☺️"
+    
+    # Отправка приветственного сообщения
+    await msg.answer(welcome_message)
+    checker.close()
