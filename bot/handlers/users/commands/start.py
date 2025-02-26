@@ -4,22 +4,25 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
-
 from db.psql.models.crud import UserChecker
-from bot.handlers.templates.user.reg import RegistrationState
-from bot.handlers.templates.user.reg import new_user_message, existing_user_message, instruction_id, link_message
+from bot.templates.user.registration import RegistrationState
+
+from bot.templates.user.menu import platform_button
+from bot.templates.user.registration import ( new_user_message, existing_user_message,
+                                             instruction_id, link_message)
+
 
 router = Router()
-
 
 # Команда /start
 @router.message(Command("start"))
 async def new_user_start(msg: Message, state: FSMContext):
-    tg_id = msg.from_user.id
+    tg_id = 123456789#msg.from_user.id
     checker = UserChecker(tg_id)
     
     if checker.user_exists():
-        await msg.answer(existing_user_message)
+        await msg.answer(existing_user_message,
+                         reply_markup=platform_button)
     else:
         await msg.answer(new_user_message)
         
@@ -34,6 +37,7 @@ async def new_user_start(msg: Message, state: FSMContext):
 
     checker.close()
 
+
 # Обработчик ссылки на календарь
 @router.message(RegistrationState.waiting_for_address)
 async def process_address(msg: Message, state: FSMContext):
@@ -46,3 +50,4 @@ async def process_address(msg: Message, state: FSMContext):
         await state.clear()
     else:
         await msg.answer("⚠️ Ошибка! Отправьте корректную ссылку Google Calendar с вашим адресом")
+
