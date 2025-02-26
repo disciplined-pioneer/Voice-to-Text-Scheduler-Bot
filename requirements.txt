@@ -1,5 +1,7 @@
 aiogram
+soundfile
+pydub
+SpeechRecognition
 python-dotenv
 sqlalchemy
 psycopg2
-pydub

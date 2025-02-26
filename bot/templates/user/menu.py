@@ -8,3 +8,10 @@ platform_button = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True,  # Кнопки адаптируются под размер экрана
 )
+
+voice_button = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="❌ Отменить запись")]
+    ],
+    resize_keyboard=True,  # Кнопки адаптируются под размер экрана
+)
