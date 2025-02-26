@@ -5,3 +5,6 @@ SpeechRecognition
 python-dotenv
 sqlalchemy
 psycopg2
+langchain
+langchain_openai
+langchain_community

@@ -11,9 +11,12 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
+from config import API_KEY_LLM
+from integrations.llm_text import ChatBot
+
 from bot.templates.user.menu import voice_button, platform_button
 
-from core.audio_chunk_processor import process_audio_in_chunks
+from integrations.audio_chunk_processor import process_audio_in_chunks
 from bot.templates.user.registration import audio_processing_message
 from bot.templates.user.voice import VoiceRecordingStates, voice_instruction_message
 
@@ -43,7 +46,7 @@ async def download_voice(msg: types.Message, state: FSMContext):
         file = await msg.bot.get_file(file_id)
 
         # Папка для сохранения голосовых файлов
-        path = f"db/voices/{str(tg_id)}/{file_id}"
+        path = f"data/voices/{str(tg_id)}/{file_id}"
         os.makedirs(path, exist_ok=True)
 
         # Скачиваем файл
@@ -61,12 +64,28 @@ async def download_voice(msg: types.Message, state: FSMContext):
             full_text = process_audio_in_chunks(path + f'/{file_id}.wav')
             await msg.reply(f"Вот ваш текст: {full_text}", reply_markup=platform_button)
 
+            # Получаем ответ от Llama
+            PROMPT_FILE = r"integrations\promp.txt"
+            path = rf'data\chats\{str(tg_id)}'
+            os.makedirs(path, exist_ok=True)
+            HISTORY_FILE = rf"{path}\chat_history_{str(tg_id)}.json"
+
+            # Создание и запуск бота
+            bot = ChatBot(API_KEY_LLM, HISTORY_FILE, PROMPT_FILE)
+            response_AI = bot.run(full_text)
+            print(response_AI)
+            await msg.reply(str(response_AI), reply_markup=platform_button)
+
         except Exception as e:
             await msg.reply(f"Ошибка при конвертации файла: {e}", reply_markup=platform_button)
 
         # Удаляем папку с аудио файлами
-        if os.path.exists(f"db/voices/{str(tg_id)}"):
-            shutil.rmtree(f"db/voices/{str(tg_id)}")
+        if os.path.exists(f"data/voices/{str(tg_id)}"):
+            shutil.rmtree(f"data/voices/{str(tg_id)}")
+
+         # Удаляем папку с чатом
+        if os.path.exists(f"data/chats/{str(tg_id)}"):
+            shutil.rmtree(f"data/chats/{str(tg_id)}")
         await state.clear()
 
     else:
