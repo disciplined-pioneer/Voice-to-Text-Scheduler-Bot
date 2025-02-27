@@ -2,20 +2,39 @@
 import os
 import shutil
 
-from aiogram import F
 import soundfile as sf
 from aiogram import types
 
 from aiogram.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardRemove
 
 from config import API_KEY_LLM
 from integrations.llm_text import ChatBot
 
-from bot.templates.user.menu import platform_button
-
-from integrations.audio_chunk_processor import process_audio_in_chunks
-from bot.templates.user.registration import audio_processing_message
+from bot.templates.user.menu import platform_button, voice_cancellation_button, voice_confirmation_button
 from bot.templates.user.voice import VoiceRecordingStates
+from bot.templates.user.registration import audio_processing_message
+from integrations.audio_chunk_processor import process_audio_in_chunks
+
+
+def generate_event_message(events):
+    message = "🚨 <b><u>Подтвердите запись вашиих данных:</u></b>\n\n"
+    
+    # Перебираем все события и формируем сообщение
+    for idx, event in enumerate(events, 1):
+        title = event.get("title", "Без названия")
+        date = event.get("date", "Без даты")
+        start_time = event.get("start_time", "Без времени")
+        end_time = event.get("end_time", "Без времени")
+        description = event.get("description", "Без дополнительной информации.")
+        
+        # Формируем строку для мероприятия
+        event_message = f"{idx}️⃣  <b>{title}</b>\n - Дата: {date}\n - Время: {start_time if start_time else 'Без времени'} - {end_time if end_time else 'Без времени'}\n - Описание: {description}\n\n"
+        
+        # Добавляем к общему сообщению
+        message += event_message
+    
+    return message
 
 
 class VoiceProcessor:
@@ -35,29 +54,40 @@ class VoiceProcessor:
         if await self.state.get_state() != VoiceRecordingStates.WAITING_FOR_VOICE:
             return
 
-        await self.msg.reply(audio_processing_message)
+        # Сохраняем сообщение, которое отправляем
+        reply_message = await self.msg.reply(audio_processing_message, reply_markup=ReplyKeyboardRemove())
 
         # Скачивание файла
         if not await self.download_voice_file():
+            await reply_message.delete()  # Удаляем сообщение
             return await self.msg.reply("Ошибка при скачивании файла.", reply_markup=platform_button)
 
         # Конвертация в WAV
         wav_path = self.convert_ogg_to_wav()
         if not wav_path:
+            await reply_message.delete()  # Удаляем сообщение
             return await self.msg.reply("Ошибка при конвертации файла.", reply_markup=platform_button)
 
         # Обработка аудио и получение текста
         full_text = process_audio_in_chunks(wav_path)
-        await self.msg.reply(f"Вот ваш текст: {full_text}")
 
         # Получение ответа от Llama
-        response_AI = self.get_llama_response(full_text)
-        await self.msg.reply(str(response_AI), reply_markup=platform_button)
+        dict_response_AI, result = self.get_llama_response(full_text)
+
+        # Если ответ нормальный
+        if result:
+            await reply_message.delete()  # Удаляем сообщение
+            await self.msg.reply(generate_event_message(dict_response_AI),
+                                reply_markup=voice_confirmation_button,
+                                parse_mode='HTML')
+        else:
+            await reply_message.delete()  # Удаляем сообщение
+            await self.msg.reply(dict_response_AI + '\nОтправьте голосовое ещё раз 🗣',
+                                reply_markup=voice_cancellation_button)
 
         # Очистка данных
         self.cleanup_user_data()
-        await self.state.clear()
-
+        
     async def download_voice_file(self) -> bool:
         """Скачивает голосовой файл и сохраняет его."""
         try:

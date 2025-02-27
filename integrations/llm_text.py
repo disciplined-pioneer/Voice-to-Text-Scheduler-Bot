@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 from typing import List, Union
 
 from langchain_openai import ChatOpenAI
@@ -50,7 +51,9 @@ class ChatBot:
         """Чтение текста из файла"""
         try:
             with open(file_path, "r", encoding='utf-8') as file:
-                content = file.read()
+                now = datetime.now()
+                days_ru = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+                content = file.read() + f"{now.day:02}.{now.month:02}.{now.year} {now.hour:02}:{now.minute:02}:{now.second:02}, {days_ru[now.weekday()]}"
             return content
         except FileNotFoundError:
             return "Промпт не найден, продолжим без него."
@@ -92,10 +95,10 @@ class ChatBot:
             # Преобразуем строку в валидный JSON
             try:
                 response_json = json.loads(response)
-                return response_json
+                return response_json, True
             except json.JSONDecodeError:
                 # Если не JSON, просто возвращаем строку
-                return response
+                return response, False
 
         except KeyboardInterrupt:
             print("\nВы принудительно остановили диалог 🛑")
