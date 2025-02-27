@@ -7,6 +7,7 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
+from db.psql.models.models import SessionFactory, Event
 from bot.templates.user.menu import voice_cancellation_button, platform_button
 from bot.templates.user.voice import VoiceRecordingStates, voice_instruction_message
 
@@ -30,18 +31,45 @@ async def handle_voice_message(msg: types.Message, state: FSMContext):
     await processor.process_voice()
 
 
-# Обработка callback_data в обработчике для "add_events"
+# Обработка для подтверждения
 @router.callback_query(lambda c: c.data == 'add_events')
 async def process_add_events(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.delete()
+
+    # Добавляет в базу данных событие
+    user_data = await state.get_data()
+    events_data = user_data.get('events', [])
+
+    # Если это список словарей
+    session = SessionFactory()
+    for event in events_data:
+        if isinstance(event, dict):
+            new_event = Event(
+                tg_id=callback_query.from_user.id,
+                date=event.get("date"),
+                title=event.get("title"),
+                description=event.get("description"),
+                start_time=event.get("start_time"),
+                end_time=event.get("end_time"),
+                alerts=event.get("alerts", 30)
+            )
+            session.add(new_event)
+        else:
+            print(f"Неверный формат данных для события: {event}")
+        
+    session.commit()
+    session.close()
+
+
     await callback_query.message.answer("Мероприятия были успешно добавлены. Все готово!", reply_markup=platform_button)
     await state.clear()  # Очищаем состояние
 
-# Обработка callback_data в обработчике для "cancel_events"
+
+# Обработчик отмены
 @router.callback_query(lambda c: c.data == 'cancel_events')
 async def process_cancel_events(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.delete()
-    await callback_query.message.answer("Добавление мероприятий было отменено. ОТправьте горлосове сообщение ещё раз, либо отмените действие", reply_markup=voice_cancellation_button )
+    await callback_query.message.answer("Добавление мероприятий было отменено. Отправьте горлосове сообщение ещё раз, либо отмените действие", reply_markup=voice_cancellation_button )
 
 
 

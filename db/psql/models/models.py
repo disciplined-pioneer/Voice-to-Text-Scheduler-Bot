@@ -28,7 +28,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     tg_id = Column(Integer, ForeignKey('users.tg_id', ondelete="CASCADE"), nullable=False)
-    day = Column(Date, nullable=False)
+    date = Column(Date, nullable=False)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     start_time = Column(Time, nullable=True)

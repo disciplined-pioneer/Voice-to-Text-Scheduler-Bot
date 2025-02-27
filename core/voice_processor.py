@@ -18,7 +18,7 @@ from integrations.audio_chunk_processor import process_audio_in_chunks
 
 
 def generate_event_message(events):
-    message = "🚨 <b><u>Подтвердите запись вашиих данных:</u></b>\n\n"
+    message = "🚨 <b><u>Подтвердите запись ваших данных:</u></b>\n\n"
     
     # Перебираем все события и формируем сообщение
     for idx, event in enumerate(events, 1):
@@ -80,6 +80,10 @@ class VoiceProcessor:
             await self.msg.reply(generate_event_message(dict_response_AI),
                                 reply_markup=voice_confirmation_button,
                                 parse_mode='HTML')
+            
+            # Сохраняем данные в состоянии
+            await self.state.update_data(events=dict_response_AI)
+            
         else:
             await reply_message.delete()  # Удаляем сообщение
             await self.msg.reply(dict_response_AI + '\nОтправьте голосовое ещё раз 🗣',
