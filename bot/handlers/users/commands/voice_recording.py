@@ -9,7 +9,7 @@ from aiogram.fsm.context import FSMContext
 
 from db.psql.models.models import SessionFactory, Event
 from bot.templates.user.menu import voice_cancellation_button, platform_button
-from bot.templates.user.voice import VoiceRecordingStates, voice_instruction_message
+from bot.templates.user.voice import *
 
 from core.voice_processor import VoiceProcessor
 
@@ -61,16 +61,20 @@ async def process_add_events(callback_query: types.CallbackQuery, state: FSMCont
     session.close()
 
 
-    await callback_query.message.answer("Мероприятия были успешно добавлены. Все готово!", reply_markup=platform_button)
-    await state.clear()  # Очищаем состояние
+    await callback_query.message.answer(event_added_message,
+                                        reply_markup=platform_button,
+                                        parse_mode='HTML')
+    await state.clear()
 
 
 # Обработчик отмены
 @router.callback_query(lambda c: c.data == 'cancel_events')
 async def process_cancel_events(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.delete()
-    await callback_query.message.answer("Добавление мероприятий было отменено. Отправьте горлосове сообщение ещё раз, либо отмените действие", reply_markup=voice_cancellation_button )
-
+    
+    await callback_query.message.answer(cancel_event_message,
+                                        reply_markup=voice_cancellation_button,
+                                        parse_mode='HTML')
 
 
 # Обработчик кнопки "❌ Отменить запись"
@@ -79,4 +83,4 @@ async def cancel_recording(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state == VoiceRecordingStates.WAITING_FOR_VOICE:
         await state.clear()
-        await message.answer("Запись отменена", reply_markup=platform_button)
+        await message.answer("Вы отменили запись и вернулись в главное меню ☺️", reply_markup=platform_button)
