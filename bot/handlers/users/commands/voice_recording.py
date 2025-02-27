@@ -1,7 +1,4 @@
-from aiogram import F
-import soundfile as sf
-from aiogram import types
-
+from aiogram import F, types
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command

@@ -1,8 +1,8 @@
 from config import DATABASE_URL
 
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 from sqlalchemy import create_engine, Column, Integer, String, Date, Time, ForeignKey
+
 
 # Настройка SQLAlchemy
 Base = declarative_base()
