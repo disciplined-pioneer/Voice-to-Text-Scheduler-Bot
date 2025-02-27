@@ -15,8 +15,7 @@ from bot.templates.user.registration import audio_processing_message
 from bot.templates.user.menu import platform_button, voice_cancellation_button, voice_confirmation_button
 
 
-def generate_event_message(events):
-    message = "🚨 <b><u>Подтвердите запись ваших данных:</u></b>\n\n"
+def generate_event_message(events, message):
     
     # Перебираем все события и формируем сообщение
     for idx, event in enumerate(events, 1):
@@ -75,7 +74,7 @@ class VoiceProcessor:
         # Если ответ нормальный
         if result:
             await reply_message.delete()  # Удаляем сообщение
-            await self.msg.reply(generate_event_message(dict_response_AI),
+            await self.msg.reply(generate_event_message(dict_response_AI, message="🚨 <b><u>Подтвердите запись ваших данных:</u></b>\n\n"),
                                 reply_markup=voice_confirmation_button,
                                 parse_mode='HTML')
             
