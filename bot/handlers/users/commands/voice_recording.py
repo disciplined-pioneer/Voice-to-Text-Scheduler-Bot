@@ -20,7 +20,9 @@ router = Router()
 @router.message(F.text == '➕ Добавить запись')
 async def voice_recording(msg: Message, state: FSMContext):
 
-    await msg.reply(voice_instruction_message, reply_markup=voice_cancellation_button)
+    await msg.reply(voice_instruction_message,
+                    reply_markup=voice_cancellation_button,
+                    parse_mode='HTML')
     await state.set_state(VoiceRecordingStates.WAITING_FOR_VOICE)
 
 

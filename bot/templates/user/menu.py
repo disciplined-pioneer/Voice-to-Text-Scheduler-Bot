@@ -10,6 +10,14 @@ platform_button = ReplyKeyboardMarkup(
     resize_keyboard=True,
 )
 
+schedule_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="📅 На сегодня"), KeyboardButton(text="📆 На завтра")],
+        [KeyboardButton(text="🗓️ На неделю"), KeyboardButton(text="📖 На месяц")],
+        [KeyboardButton(text="◀️ Назад")]
+    ],
+    resize_keyboard=True,
+)
 
 voice_cancellation_button = ReplyKeyboardMarkup(
     keyboard=[
