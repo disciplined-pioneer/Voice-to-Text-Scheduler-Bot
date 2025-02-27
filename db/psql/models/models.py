@@ -30,9 +30,10 @@ class Event(Base):
     tg_id = Column(Integer, ForeignKey('users.tg_id', ondelete="CASCADE"), nullable=False)
     day = Column(Date, nullable=False)
     title = Column(String, nullable=False)
-    description = Column(String)
-    start_time = Column(Time, nullable=False)
-    end_time = Column(Time, nullable=False)
+    description = Column(String, nullable=True)
+    start_time = Column(Time, nullable=True)
+    end_time = Column(Time, nullable=True)
+    alerts = Column(Integer, nullable=False, default=30)
 
     # Обратная связь с пользователем
     user = relationship("User", back_populates="events")

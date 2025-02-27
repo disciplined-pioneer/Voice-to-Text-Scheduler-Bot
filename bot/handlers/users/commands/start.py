@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from db.psql.models.crud import UserChecker
+from db.psql.models.models import SessionFactory, User
 from bot.templates.user.registration import RegistrationState
 
 from bot.templates.user.menu import platform_button
@@ -12,12 +13,15 @@ from bot.templates.user.registration import ( new_user_message, existing_user_me
                                              instruction_id, link_message)
 
 
+# Создание сессии
+session = SessionFactory()
+
 router = Router()
 
 # Команда /start
 @router.message(Command("start"))
 async def new_user_start(msg: Message, state: FSMContext):
-    tg_id = 123456789#msg.from_user.id
+    tg_id = msg.from_user.id
     checker = UserChecker(tg_id)
     
     if checker.user_exists():
@@ -45,8 +49,16 @@ async def process_address(msg: Message, state: FSMContext):
     # Проверяем, содержит ли адрес нужный фрагмент
     address = msg.text.strip()
     if "https://calendar.google.com/calendar/" in address:
-        
-        await msg.answer(f"✅ Спасибо! Ваш календарь сохранён:\n{address}")
+
+        # Добавление в базу данных
+        tg_id = msg.from_user.id
+        new_user = User(tg_id=tg_id, key_calendar=address)
+        session.add(new_user)
+        session.commit()
+        session.close()
+
+        await msg.answer(f"✅ Спасибо! Ваш календарь сохранён:\n{address}",
+                         reply_markup=platform_button)
         await state.clear()
     else:
         await msg.answer("⚠️ Ошибка! Отправьте корректную ссылку Google Calendar с вашим адресом")
