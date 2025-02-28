@@ -49,7 +49,7 @@ async def schedule_handler(message: types.Message):
         event_message = "У вас нет событий за выбранный период! 🙅‍♂️"
 
     # Отправляем сообщение с расписанием и кнопками
-    await message.answer(event_message,
+    await message.reply(event_message,
                          reply_markup=schedule_keyboard,
                          parse_mode='HTML')
 

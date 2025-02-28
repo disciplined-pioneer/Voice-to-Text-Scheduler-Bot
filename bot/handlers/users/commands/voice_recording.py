@@ -26,6 +26,8 @@ async def voice_recording(msg: Message, state: FSMContext):
 @router.message(F.voice)
 async def handle_voice_message(msg: types.Message, state: FSMContext):
     """Обработчик голосовых сообщений в боте."""
+    await msg.chat.delete_message(message_id=msg.message_id - 1)
+    
     processor = VoiceProcessor(msg, state)
     await processor.process_voice()
 
@@ -33,6 +35,7 @@ async def handle_voice_message(msg: types.Message, state: FSMContext):
 # Обработка для подтверждения
 @router.callback_query(lambda c: c.data == 'add_events')
 async def process_add_events(callback_query: types.CallbackQuery, state: FSMContext):
+    
     await callback_query.message.delete()
 
     # Добавляет в базу данных событие
@@ -81,5 +84,6 @@ async def process_cancel_events(callback_query: types.CallbackQuery, state: FSMC
 async def cancel_recording(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state == VoiceRecordingStates.WAITING_FOR_VOICE:
+        await message.chat.delete_message(message_id=message.message_id - 1)
         await state.clear()
         await message.answer("Вы отменили запись и вернулись в главное меню ☺️", reply_markup=platform_button)
