@@ -11,7 +11,7 @@ from bot.templates.user.menu import schedule_keyboard, platform_button
 
 router = Router()
 
-@router.message(Command("/records"))
+@router.message(Command("records"))
 @router.message(F.text == '📜 Посмотреть записи')
 async def voice_recording(msg: Message, state: FSMContext):
     await msg.answer('Пожалуйста, выберите подходящий период 🙂', reply_markup=schedule_keyboard)

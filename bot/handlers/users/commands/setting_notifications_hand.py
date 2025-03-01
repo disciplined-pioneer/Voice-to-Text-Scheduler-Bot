@@ -16,12 +16,12 @@ router = Router()
 session = SessionFactory()
 
 # Обработчик для команды настройки уведомлений
-@router.message(Command("/notifications"))
+@router.message(Command("notifications"))
 @router.message(F.text == "🔔 Настроить уведомления")
 async def notification_processing(msg: Message, state: FSMContext):
 
     # Переходим в состояние ожидания ввода времени
-    await msg.answer(notification_text,
+    await msg.reply(notification_text,
                      reply_markup=alerts_cancellation_button,
                      parse_mode='HTML')
     
@@ -31,6 +31,8 @@ async def notification_processing(msg: Message, state: FSMContext):
 # Обработчик для состояния ожидания времени
 @router.message(NotificationState.waiting_for_time)
 async def process_time(msg: Message, state: FSMContext):
+
+    await msg.chat.delete_message(message_id=msg.message_id - 1)
 
     if msg.text == "❌ Отменить настройку":
         await cancel_recording(msg, state)
@@ -65,11 +67,12 @@ async def process_time(msg: Message, state: FSMContext):
         session.commit()
         session.close()
 
-        await msg.answer(f"✅ Ты выбрал {total_minutes} минут(ы). Уведомление установлено! 😉",
+        await msg.answer(f"✅ Вы выбрали {total_minutes} минут(ы). Уведомление установлено! 😉",
                          reply_markup=platform_button)
         await state.clear()
     else:
-        await msg.answer(invalid_time_format_message)
+        await msg.answer(invalid_time_format_message,
+                         reply_markup=alerts_cancellation_button,)
 
 
 # Обработчик кнопки "❌ Отменить настройку"
@@ -80,10 +83,9 @@ async def cancel_recording(message: types.Message, state: FSMContext):
     # Если мы находимся в нужном состоянии (ожидание ввода времени)
     if current_state == NotificationState.waiting_for_time:
 
-        # Удаляем предыдущее сообщение с инструкциями, если оно было
-        if message.reply_to_message:
-            await message.reply_to_message.delete()
+        await message.chat.delete_message(message_id=message.message_id - 1)
 
         # Отменяем состояние и возвращаем в главное меню
         await state.clear()
-        await message.answer("Вы отменили настройку и вернулись в главное меню ☺️", reply_markup=platform_button)
+        await message.answer("Вы отменили настройку и вернулись в главное меню ☺️",
+                             reply_markup=platform_button)
