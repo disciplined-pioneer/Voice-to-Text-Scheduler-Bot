@@ -12,8 +12,7 @@ router = Router()
 
 @router.message(F.text == '📜 Посмотреть записи')
 async def voice_recording(msg: Message, state: FSMContext):
-
-    await msg.answer('Выберите период:', reply_markup=schedule_keyboard)
+    await msg.answer('Пожалуйста, выберите подходящий период 🙂', reply_markup=schedule_keyboard)
 
 
 @router.message(lambda message: message.text in ["📅 На сегодня", "📆 На завтра", "🗓️ На неделю", "📖 На месяц"])

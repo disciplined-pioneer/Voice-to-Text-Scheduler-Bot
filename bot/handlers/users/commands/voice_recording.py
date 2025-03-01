@@ -4,13 +4,14 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
-from db.psql.models.models import SessionFactory, Event
+from db.psql.models.models import SessionFactory, Event, UserAlerts
 from bot.templates.user.menu import voice_cancellation_button, platform_button
 from bot.templates.user.voice import *
 
 from core.voice_processor import VoiceProcessor
 
 router = Router()
+session = SessionFactory()
 
 # Команда /voice
 @router.message(Command("voice_recording"))
@@ -38,12 +39,16 @@ async def process_add_events(callback_query: types.CallbackQuery, state: FSMCont
     
     await callback_query.message.delete()
 
+    # Узнаём время alerts для th_id
+    tg_id = callback_query.from_user.id
+    alerts = session.query(UserAlerts).filter(UserAlerts.tg_id == tg_id).first()
+    alerts_value = alerts.alerts
+
     # Добавляет в базу данных событие
     user_data = await state.get_data()
     events_data = user_data.get('events', [])
 
     # Если это список словарей
-    session = SessionFactory()
     for event in events_data:
         if isinstance(event, dict):
             new_event = Event(
@@ -53,7 +58,7 @@ async def process_add_events(callback_query: types.CallbackQuery, state: FSMCont
                 description=event.get("description"),
                 start_time=event.get("start_time"),
                 end_time=event.get("end_time"),
-                alerts=event.get("alerts", 30)
+                alerts=event.get("alerts", alerts_value)
             )
             session.add(new_event)
         else:

@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from db.psql.models.crud import UserChecker
-from db.psql.models.models import SessionFactory, User
+from db.psql.models.models import SessionFactory, User, UserAlerts
 from bot.templates.user.menu import platform_button
 from bot.templates.user.registration import (RegistrationState, new_user_message,
                                             existing_user_message, instruction_id, link_message)
@@ -49,8 +49,8 @@ async def process_address(msg: Message, state: FSMContext):
 
         # Добавление в базу данных
         tg_id = msg.from_user.id
-        new_user = User(tg_id=tg_id, key_calendar=address)
-        session.add(new_user)
+        session.add(User(tg_id=tg_id, key_calendar=address))
+        session.add(UserAlerts(tg_id=tg_id, alerts=30))
         session.commit()
         session.close()
 

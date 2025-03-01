@@ -33,3 +33,10 @@ voice_confirmation_button = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="❌ Отменить мероприятия", callback_data="cancel_events")]
     ]
 )
+
+alerts_cancellation_button = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="❌ Отменить настройку")]
+    ],
+    resize_keyboard=True,
+)

@@ -29,7 +29,7 @@ class NotificationScheduler:
             alert_time = event_time - timedelta(minutes=event.alerts)
 
             if event.date == current_date and (alert_time.strftime('%H:%M') == current_time or event_time.strftime('%H:%M') == current_time):
-                message = f"⏰ Напоминание о событии:\n\n<b>{event.title}</b>\n - Дата: {event.date}\n - Время: {event.start_time.strftime('%H:%M')}\n - Описание: {event.description}"
+                message = f"<b><u>⏰ Напоминание о событии:</u></b>\n\n<b>{event.title}</b>\n - Дата: {event.date}\n - Время: {event.start_time.strftime('%H:%M')}\n - Описание: {event.description}"
             
                 await self.send_notification(event.tg_id, message)
 
