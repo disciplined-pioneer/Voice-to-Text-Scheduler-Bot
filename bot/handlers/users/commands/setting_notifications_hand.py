@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 
 from db.psql.models.models import SessionFactory, UserAlerts
 from bot.templates.user.menu import platform_button, alerts_cancellation_button
-from bot.templates.user.setting_notifications import notification_text, NotificationState, invalid_time_format_message
+from bot.templates.user.setting_notifications_temp import notification_text, NotificationState, invalid_time_format_message
 
 router = Router()
 session = SessionFactory()

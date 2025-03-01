@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from db.psql.models.crud import UserChecker
 from db.psql.models.models import SessionFactory, User, UserAlerts
 from bot.templates.user.menu import platform_button
-from bot.templates.user.registration import (RegistrationState, new_user_message,
+from bot.templates.user.registration_temp import (RegistrationState, new_user_message,
                                             existing_user_message, instruction_id, link_message)
 
 # Создание сессии

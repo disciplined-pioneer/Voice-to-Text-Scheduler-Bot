@@ -7,11 +7,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 
 from config import API_KEY_LLM
-from integrations.llm_text import ChatBot
+from integrations.llm_chatbot import ChatBot
 from integrations.audio_chunk_processor import process_audio_in_chunks
 
-from bot.templates.user.voice import VoiceRecordingStates
-from bot.templates.user.registration import audio_processing_message
+from bot.templates.user.voice_recording_temp import VoiceRecordingStates
+from bot.templates.user.registration_temp import audio_processing_message
 from bot.templates.user.menu import platform_button, voice_cancellation_button, voice_confirmation_button
 
 

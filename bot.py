@@ -2,13 +2,13 @@ import asyncio
 from config import TOKEN
 
 from aiogram import Bot, Dispatcher
-from core.notification_scheduler import NotificationScheduler
+from core.setting_notifications import NotificationScheduler
 
 from db.psql.models.models import SessionFactory
-from bot.handlers.users.commands.start import router as hello_router
-from bot.handlers.users.commands.voice_recording import router as voice_router
+from bot.handlers.users.commands.registration_hand import router as hello_router
+from bot.handlers.users.commands.voice_recording_hand import router as voice_router
 from bot.handlers.users.commands.schedule_handlers import router as schedule_router
-from bot.handlers.users.commands.setting_notifications import router as notifications_router
+from bot.handlers.users.commands.setting_notifications_hand import router as notifications_router
 
 # Создание экземпляра бота и диспетчера
 bot = Bot(token=TOKEN)
