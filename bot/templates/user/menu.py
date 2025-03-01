@@ -3,9 +3,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 platform_button = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="📜 Посмотреть записи")],
-        [KeyboardButton(text="➕ Добавить запись")],
-        [KeyboardButton(text="🔔 Настроить уведомления")],
+        [KeyboardButton(text="📜 Посмотреть записи"), KeyboardButton(text="➕ Добавить запись")],
+        [KeyboardButton(text="🔔 Настроить уведомления"), KeyboardButton(text="📕 Инструкция")]
     ],
     resize_keyboard=True,
 )
