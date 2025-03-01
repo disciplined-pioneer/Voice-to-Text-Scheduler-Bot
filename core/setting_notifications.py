@@ -1,9 +1,6 @@
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta
-from db.psql.models.models import Event, SessionFactory
-from aiogram import Bot
-
-from core.voice_processor import generate_event_message
+from db.psql.models.models import Event
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 class NotificationScheduler:
     

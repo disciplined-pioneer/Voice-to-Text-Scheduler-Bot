@@ -1,14 +1,15 @@
-from aiogram import F, types
-from aiogram import Router
+
 from aiogram.types import Message
 from aiogram.filters import Command
+from aiogram import F, types, Router
 from aiogram.fsm.context import FSMContext
+
+from core.voice_processor import VoiceProcessor
 
 from db.psql.models.models import SessionFactory, Event, UserAlerts
 from bot.templates.user.menu import voice_cancellation_button, platform_button
 from bot.templates.user.voice_recording_temp import *
 
-from core.voice_processor import VoiceProcessor
 
 router = Router()
 session = SessionFactory()

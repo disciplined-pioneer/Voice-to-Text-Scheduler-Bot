@@ -1,17 +1,22 @@
 import re
-from aiogram import F, types
-from aiogram import Router
+
 from aiogram.types import Message
+from aiogram.filters import Command
+from aiogram import F, types, Router
 from aiogram.fsm.context import FSMContext
 
 from db.psql.models.models import SessionFactory, UserAlerts
 from bot.templates.user.menu import platform_button, alerts_cancellation_button
-from bot.templates.user.setting_notifications_temp import notification_text, NotificationState, invalid_time_format_message
+from bot.templates.user.setting_notifications_temp import (
+    notification_text, NotificationState, invalid_time_format_message
+)
+
 
 router = Router()
 session = SessionFactory()
 
 # Обработчик для команды настройки уведомлений
+@router.message(Command("/notifications"))
 @router.message(F.text == "🔔 Настроить уведомления")
 async def notification_processing(msg: Message, state: FSMContext):
 

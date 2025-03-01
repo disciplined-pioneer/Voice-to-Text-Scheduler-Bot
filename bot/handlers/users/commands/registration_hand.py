@@ -11,9 +11,8 @@ from bot.templates.user.registration_temp import (RegistrationState, new_user_me
                                             existing_user_message, instruction_id, link_message)
 
 # Создание сессии
-session = SessionFactory()
-
 router = Router()
+session = SessionFactory()
 
 # Команда /start
 @router.message(Command("start"))
@@ -59,4 +58,3 @@ async def process_address(msg: Message, state: FSMContext):
         await state.clear()
     else:
         await msg.answer("⚠️ Ошибка! Отправьте корректную ссылку Google Calendar с вашим адресом")
-

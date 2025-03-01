@@ -1,15 +1,17 @@
-from aiogram import F, types
 from datetime import datetime, timedelta
-from aiogram import Router
-from aiogram.types import Message
-from aiogram.fsm.context import FSMContext
-from db.psql.models.models import SessionFactory, Event
 
-from bot.templates.user.menu import schedule_keyboard, platform_button
+from aiogram.types import Message
+from aiogram.filters import Command
+from aiogram import F, types, Router
+from aiogram.fsm.context import FSMContext
+
+from db.psql.models.models import SessionFactory, Event
 from core.voice_processor import generate_event_message
+from bot.templates.user.menu import schedule_keyboard, platform_button
 
 router = Router()
 
+@router.message(Command("/records"))
 @router.message(F.text == '📜 Посмотреть записи')
 async def voice_recording(msg: Message, state: FSMContext):
     await msg.answer('Пожалуйста, выберите подходящий период 🙂', reply_markup=schedule_keyboard)
