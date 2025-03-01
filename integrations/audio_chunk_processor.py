@@ -33,7 +33,7 @@ def process_audio_chunk(chunk, chunk_index, recognizer, file_path):
 
 
 # Функция для разбиения аудио на фрагменты и последовательной обработки с многопоточностью
-def process_audio_in_chunks(audio_path, chunk_length=60000):  # chunk_length в миллисекундах
+def process_audio_in_chunks(audio_path, chunk_length=60000):
     
     recognizer = sr.Recognizer()
     wav_path = audio_path

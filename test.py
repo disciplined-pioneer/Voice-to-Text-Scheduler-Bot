@@ -1,13 +1,16 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
-import random
-import time  # Для контроля времени выполнения программы
+from datetime import datetime, timedelta
+import time
 
-# Список случайных событий (вместо базы данных)
-events = [
-    {"tg_id": 12345, "date": "27.02.2025", "start_time": "21:26", "title": "Встреча с клиентом"},
-    {"tg_id": 67890, "date": "27.02.2025", "start_time": "21:27", "title": "Завтрак с коллегами"},
-    {"tg_id": 11223, "date": "27.02.2025", "start_time": "21:28", "title": "Рабочий звонок"},
+from db.psql.models.models import Event, SessionFactory
+
+session = SessionFactory()
+events = session.query(Event).all()
+
+# Преобразование в список словарей
+event_list = [
+    {key: getattr(event, key) for key in event.__dict__.keys() if not key.startswith("_")}
+    for event in events
 ]
 
 # Функция для отправки уведомлений (можно заменить на реальное отправление)
@@ -17,16 +20,20 @@ def send_notification(user_id, message):
 
 # Функция для проверки, нужно ли отправить уведомление
 def check_notifications():
-    """Проверка времени для отправки уведомлений"""
-    current_time = datetime.now().strftime('%H:%M')  # Получаем текущее время в формате ЧЧ:ММ
-    print("Текущее время:", current_time)
-    current_date = datetime.now().strftime('%d.%m.%Y')  # Получаем текущую дату в формате ДД.ММ.ГГГГ
+    """Проверка времени для отправки уведомлений с учётом `alerts`"""
+    current_time = datetime.now().strftime('%H:%M')  # Текущее время в ЧЧ:ММ
+    current_date = datetime.now().date()  # Текущая дата (объект datetime.date)
 
-    # Пробегаем по списку событий и проверяем, совпадает ли время с текущим
+    print("Текущее время:", current_time)
+
     for event in events:
-        if event["date"] == current_date and event["start_time"] == current_time:
-            message = f"⏰ Напоминание о событии:\n\n<b>{event['title']}</b>\nДата: {event['date']}\nВремя: {event['start_time']}"
-            send_notification(event["tg_id"], message)
+        event_time = datetime.combine(event.date, event.start_time)  # Объединяем дату и время
+        alert_time = event_time - timedelta(minutes=event.alerts)  # Отнимаем `alerts`
+        
+        if event.date == current_date and alert_time.strftime('%H:%M') == current_time:
+            message = f"⏰ Напоминание о событии:\n\n<b>{event.title}</b>\nДата: {event.date}\nВремя: {event.start_time.strftime('%H:%M')}"
+            send_notification(event.tg_id, message)
+
 
 # Запуск планировщика
 scheduler = BackgroundScheduler()
