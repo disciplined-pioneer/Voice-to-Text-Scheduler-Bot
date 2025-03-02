@@ -6,7 +6,8 @@ logging.basicConfig(level=logging.CRITICAL)
 
 # 🔑 API-ключ и ID базы данных
 NOTION_API_KEY = ""
-DATABASE_ID = "" 
+DATABASE_ID = ""
+
 
 # 📌 Заголовки API
 HEADERS = {

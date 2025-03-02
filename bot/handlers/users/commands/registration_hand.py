@@ -1,3 +1,4 @@
+import re
 import asyncio
 from aiogram import Router
 from aiogram.types import Message
@@ -13,6 +14,10 @@ from bot.templates.user.registration_temp import (RegistrationState, new_user_me
 # Создание сессии
 router = Router()
 session = SessionFactory()
+
+# Регулярное выражение для проверки API ключа и ID DB
+API_KEY_PATTERN = r"^ntn_[a-zA-Z0-9]+$"
+DB_ID_PATTERN = r"^https://www.notion.so/([a-f0-9]{32})\?v="  # Примерный формат ID
 
 # Команда /start
 @router.message(Command("start"))
@@ -43,6 +48,11 @@ async def new_user_start(msg: Message, state: FSMContext):
 async def process_api_key(msg: Message, state: FSMContext):
     api_key = msg.text.strip()
 
+    # Проверяем формат API ключа
+    if not re.match(API_KEY_PATTERN, api_key):
+        await msg.answer("⚠️ Неверный формат API ключа. Пожалуйста, отправьте правильный API ключ.")
+        return
+
     # Сохраняем API ключ
     await state.update_data(api_key=api_key)
 
@@ -54,7 +64,16 @@ async def process_api_key(msg: Message, state: FSMContext):
 # Обработчик ID базы данных
 @router.message(RegistrationState.waiting_for_db_id)
 async def process_db_id(msg: Message, state: FSMContext):
-    db_id = msg.text.strip()
+    db_url = msg.text.strip()
+
+    # Проверяем, что ссылка на базу данных соответствует ожидаемому формату
+    match = re.match(DB_ID_PATTERN, db_url)
+    if not match:
+        await msg.answer("⚠️ Неверный формат ID базы данных. Пожалуйста, отправьте корректную ссылку.")
+        return
+
+    # Извлекаем ID базы данных
+    db_id = match.group(1)
 
     # Сохраняем ID базы данных
     user_data = await state.get_data()
