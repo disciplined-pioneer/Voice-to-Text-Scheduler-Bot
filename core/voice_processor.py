@@ -46,6 +46,11 @@ class VoiceProcessor:
         self.voice_path = f"data/voices/{self.tg_id}"
         self.chat_path = f"data/chats/{self.tg_id}"
 
+        # Создаем папки, если они не существуют
+        os.makedirs("data", exist_ok=True)
+        os.makedirs(self.voice_path, exist_ok=True)
+        os.makedirs(self.chat_path, exist_ok=True)
+
     async def process_voice(self):
         """Основной метод обработки голосового сообщения."""
         if await self.state.get_state() != VoiceRecordingStates.WAITING_FOR_VOICE:
@@ -92,7 +97,6 @@ class VoiceProcessor:
     async def download_voice_file(self) -> bool:
         """Скачивает голосовой файл и сохраняет его."""
         try:
-            os.makedirs(self.voice_path, exist_ok=True)
             file = await self.msg.bot.get_file(self.file_id)
             destination = os.path.join(self.voice_path, f"{self.file_id}.ogg")
             await self.msg.bot.download_file(file.file_path, destination)
@@ -102,7 +106,7 @@ class VoiceProcessor:
             return False
 
     def convert_ogg_to_wav(self) -> str:
-        """Конвертирует OGG в WAV и возвращает путь к файлу."""
+        """Конвертирует OGG в WAV и возвращает путь к файлу.""" 
         try:
             ogg_path = os.path.join(self.voice_path, f"{self.file_id}.ogg")
             data, samplerate = sf.read(ogg_path)
@@ -114,8 +118,7 @@ class VoiceProcessor:
             return ""
 
     def get_llama_response(self, text: str) -> str:
-        """Запрашивает ответ у Llama на основе переданного текста."""
-        os.makedirs(self.chat_path, exist_ok=True)
+        """Запрашивает ответ у Llama на основе переданного текста."""        
         bot = ChatBot(API_KEY_LLM, f"{self.chat_path}/chat_history_{self.tg_id}.json", r"integrations/promp.txt")
         return bot.run(text)
 
