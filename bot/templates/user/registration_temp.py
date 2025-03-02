@@ -3,6 +3,8 @@ from aiogram.fsm.state import StatesGroup, State
 # Класс для ожидания адреса
 class RegistrationState(StatesGroup):
     waiting_for_address = State()
+    waiting_for_api_key = State()
+    waiting_for_db_id = State()
 
 new_user_message = """
 👋 Привет! Я твой бот для создания расписания с помощью голосовых сообщений. Вот что я могу:\n

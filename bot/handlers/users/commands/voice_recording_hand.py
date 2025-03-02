@@ -52,6 +52,8 @@ async def process_add_events(callback_query: types.CallbackQuery, state: FSMCont
     # Если это список словарей
     for event in events_data:
         if isinstance(event, dict):
+
+            # Добавлям в базу данных
             new_event = Event(
                 tg_id=callback_query.from_user.id,
                 date=event.get("date"),
@@ -62,12 +64,18 @@ async def process_add_events(callback_query: types.CallbackQuery, state: FSMCont
                 alerts=event.get("alerts", alerts_value)
             )
             session.add(new_event)
+
+
+            # Преобразуем данные события и добавляем в БД в Notion
+            from test import transform_event_data, add_event
+            transformed_event = transform_event_data(event)
+            add_event(transformed_event['name'], transformed_event['start_date'], transformed_event['end_date'])
+
         else:
             print(f"Неверный формат данных для события: {event}")
         
     session.commit()
     session.close()
-
 
     await callback_query.message.answer(event_added_message,
                                         reply_markup=platform_button,

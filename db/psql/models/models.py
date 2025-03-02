@@ -10,11 +10,11 @@ SessionFactory = sessionmaker(bind=engine)
 
 # Модель пользователя
 class User(Base):
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    tg_id = Column(Integer, unique=True, nullable=False)
-    key_calendar = Column(String, unique=True, nullable=False)
+    __tablename__ = "users"
+    
+    tg_id = Column(Integer, primary_key=True)
+    api_key = Column(String, nullable=False)
+    db_id = Column(String, nullable=False)
 
     # Связь с событиями
     events = relationship("Event", back_populates="user")
