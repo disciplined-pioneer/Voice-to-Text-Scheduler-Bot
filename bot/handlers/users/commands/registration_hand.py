@@ -5,6 +5,8 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
+from aiogram.types import ReplyKeyboardRemove
+
 from db.psql.models.crud import UserChecker
 from db.psql.models.models import SessionFactory, User, UserAlerts
 from bot.templates.user.menu import platform_button, cancellation_button
@@ -27,9 +29,11 @@ async def new_user_start(msg: Message, state: FSMContext):
     
     if checker.user_exists():
         await msg.answer(existing_user_message,
-                         reply_markup=platform_button)
+                         reply_markup=platform_button,
+                         parse_mode='HTML')
     else:
-        await msg.answer(new_user_message)
+        await msg.answer(new_user_message,
+                         parse_mode='HTML')
         
         await asyncio.sleep(1.5)
         await msg.bot.send_document(
@@ -109,4 +113,6 @@ async def process_db_id(msg: Message, state: FSMContext):
 @router.message(lambda message: message.text == "❌ Отменить настройку")
 async def cancel_recording(message: types.Message, state: FSMContext):
 
-    await message.answer("❌ Вы отменили настройку. Но вы можете нажать на /start, чтобы начать занова")
+    await message.answer("❌ Вы отменили настройку. Но вы можете нажать занова, введя команду /start",
+                         reply_markup=ReplyKeyboardRemove())
+    await state.clear()
