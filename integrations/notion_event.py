@@ -4,18 +4,6 @@ from datetime import datetime, time
 import logging
 logging.basicConfig(level=logging.CRITICAL)
 
-# 🔑 API-ключ и ID базы данных
-NOTION_API_KEY = ""
-DATABASE_ID = ""
-
-
-# 📌 Заголовки API
-HEADERS = {
-    "Authorization": f"Bearer {NOTION_API_KEY}",
-    "Content-Type": "application/json",
-    "Notion-Version": "2022-06-28"
-}
-
 
 def transform_event_data(event):
 
@@ -46,16 +34,25 @@ def transform_event_data(event):
     else:
         end_date_time_str = None
 
-    # Возвращаем преобразованные данные для передачи в add_event
+    # Возвращаем преобразованные данные для передачи в add_eventЦ
     return {
         "name": event['title'],
         "start_date": start_date_time_str,
         "end_date": end_date_time_str
     }
 
-def add_event(name: str, start_date: str = None, end_date: str = None):
+
+def add_event(name: str, start_date: str = None, end_date: str = None,
+              NOTION_API_KEY: str = None, DATABASE_ID: str = None):
     
     """Добавляет событие в Notion"""
+
+
+    HEADERS = {
+        "Authorization": f"Bearer {NOTION_API_KEY}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
     
     if not name:
         print("❌ Ошибка: У события должно быть название!")
@@ -79,4 +76,5 @@ def add_event(name: str, start_date: str = None, end_date: str = None):
     if response.status_code != 200:
         return False
 
+    print("✅ Событие успешно добавлено!")
     return True  # Возвращаем True при успешном добавлении события

@@ -5,8 +5,9 @@ from aiogram import F, types, Router
 from aiogram.fsm.context import FSMContext
 
 from core.voice_processor import VoiceProcessor
+from integrations.notion_event import transform_event_data, add_event
 
-from db.psql.models.models import SessionFactory, Event, UserAlerts
+from db.psql.models.models import SessionFactory, Event, UserAlerts, User
 from bot.templates.user.menu import voice_cancellation_button, platform_button
 from bot.templates.user.voice_recording_temp import *
 
@@ -67,9 +68,10 @@ async def process_add_events(callback_query: types.CallbackQuery, state: FSMCont
 
 
             # Преобразуем данные события и добавляем в БД в Notion
-            from test import transform_event_data, add_event
+            user = session.query(User).filter(User.tg_id == tg_id).first()
             transformed_event = transform_event_data(event)
-            add_event(transformed_event['name'], transformed_event['start_date'], transformed_event['end_date'])
+            add_event(transformed_event['name'], transformed_event['start_date'], transformed_event['end_date'],
+                      user.api_key, user.db_id)
 
         else:
             print(f"Неверный формат данных для события: {event}")
