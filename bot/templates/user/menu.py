@@ -38,8 +38,7 @@ voice_confirmation_button = InlineKeyboardMarkup(
     ]
 )
 
-
-alerts_cancellation_button = ReplyKeyboardMarkup(
+cancellation_button = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="❌ Отменить настройку")]
     ],

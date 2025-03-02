@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from aiogram import F, types, Router
 from aiogram.fsm.context import FSMContext
 
+from db.psql.models.crud import UserChecker
 from db.psql.models.models import SessionFactory, Event
 from core.voice_processor import generate_event_message
 from bot.templates.user.menu import schedule_keyboard, platform_button
@@ -14,11 +15,24 @@ router = Router()
 @router.message(Command("records"))
 @router.message(F.text == '📜 Посмотреть записи')
 async def voice_recording(msg: Message, state: FSMContext):
+
+    tg_id = msg.from_user.id
+    checker = UserChecker(tg_id)
+    if not checker.user_exists():
+        await msg.reply("❌ В доступе отказано, вы не предоставили ключи для подключения к Notion!")
+        return
+
     await msg.answer('Пожалуйста, выберите подходящий период 🙂', reply_markup=schedule_keyboard)
 
 
 @router.message(lambda message: message.text in ["📅 На сегодня", "📆 На завтра", "🗓️ На неделю", "📖 На месяц"])
 async def schedule_handler(message: types.Message):
+
+    tg_id = message.from_user.id
+    checker = UserChecker(tg_id)
+    if not checker.user_exists():
+        await message.reply("❌ В доступе отказано, вы не предоставили ключи для подключения к Notion!")
+        return
 
     # Создаем сессию для работы с базой данных
     session = SessionFactory()
@@ -57,5 +71,11 @@ async def schedule_handler(message: types.Message):
 
 @router.message(F.text == '◀️ Назад')
 async def voice_recording(msg: Message, state: FSMContext):
+
+    tg_id = msg.from_user.id
+    checker = UserChecker(tg_id)
+    if not checker.user_exists():
+        await msg.reply("❌ В доступе отказано, вы не предоставили ключи для подключения к Notion!")
+        return
 
     await msg.answer('Вы вернулись в главное меню 😊', reply_markup=platform_button)

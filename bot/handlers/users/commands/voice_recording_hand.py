@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from core.voice_processor import VoiceProcessor
 from integrations.notion_event import transform_event_data, add_event
 
+from db.psql.models.crud import UserChecker
 from db.psql.models.models import SessionFactory, Event, UserAlerts, User
 from bot.templates.user.menu import voice_cancellation_button, platform_button
 from bot.templates.user.voice_recording_temp import *
@@ -19,6 +20,12 @@ session = SessionFactory()
 @router.message(Command("voice_recording"))
 @router.message(F.text == '➕ Добавить запись')
 async def voice_recording(msg: Message, state: FSMContext):
+
+    tg_id = msg.from_user.id
+    checker = UserChecker(tg_id)
+    if not checker.user_exists():
+        await msg.reply("❌ В доступе отказано, вы не предоставили ключи для подключения к Notion!")
+        return
 
     await msg.reply(voice_instruction_message,
                     reply_markup=voice_cancellation_button,
@@ -98,6 +105,13 @@ async def process_cancel_events(callback_query: types.CallbackQuery, state: FSMC
 # Обработчик кнопки "❌ Отменить запись"
 @router.message(lambda message: message.text == "❌ Отменить запись")
 async def cancel_recording(message: types.Message, state: FSMContext):
+
+    tg_id = message.from_user.id
+    checker = UserChecker(tg_id)
+    if not checker.user_exists():
+        await message.reply("❌ В доступе отказано, вы не предоставили ключи для подключения к Notion!")
+        return
+
     current_state = await state.get_state()
     if current_state == VoiceRecordingStates.WAITING_FOR_VOICE:
         await message.chat.delete_message(message_id=message.message_id - 1)

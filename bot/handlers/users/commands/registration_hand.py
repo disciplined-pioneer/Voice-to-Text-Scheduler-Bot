@@ -1,13 +1,13 @@
 import re
 import asyncio
-from aiogram import Router
+from aiogram import Router, types
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from db.psql.models.crud import UserChecker
 from db.psql.models.models import SessionFactory, User, UserAlerts
-from bot.templates.user.menu import platform_button
+from bot.templates.user.menu import platform_button, cancellation_button
 from bot.templates.user.registration_temp import (RegistrationState, new_user_message,
                                                 existing_user_message, link_message, instruction_id)
 
@@ -35,7 +35,8 @@ async def new_user_start(msg: Message, state: FSMContext):
         await msg.bot.send_document(
             chat_id=tg_id,
             document=instruction_id,
-            caption=link_message
+            caption=link_message,
+            reply_markup=cancellation_button
         )
 
         await state.set_state(RegistrationState.waiting_for_api_key)  # Устанавливаем состояние ожидания API ключа
@@ -46,11 +47,17 @@ async def new_user_start(msg: Message, state: FSMContext):
 # Обработчик API ключа
 @router.message(RegistrationState.waiting_for_api_key)
 async def process_api_key(msg: Message, state: FSMContext):
+
+    if msg.text == "❌ Отменить настройку":
+        await cancel_recording(msg, state)
+        return
+
     api_key = msg.text.strip()
 
     # Проверяем формат API ключа
     if not re.match(API_KEY_PATTERN, api_key):
-        await msg.answer("⚠️ Неверный формат API ключа. Пожалуйста, отправьте правильный API ключ.")
+        await msg.answer("⚠️ Неверный формат API ключа. Пожалуйста, отправьте правильный API ключ",
+                     reply_markup=cancellation_button)
         return
 
     # Сохраняем API ключ
@@ -58,18 +65,25 @@ async def process_api_key(msg: Message, state: FSMContext):
 
     # Переход к следующему шагу
     await state.set_state(RegistrationState.waiting_for_db_id)
-    await msg.answer("📝 Пожалуйста, отправьте ID вашей базы данных:")
+    await msg.answer("📝 Пожалуйста, отправьте ID вашей базы данных:",
+                     reply_markup=cancellation_button)
 
 
 # Обработчик ID базы данных
 @router.message(RegistrationState.waiting_for_db_id)
 async def process_db_id(msg: Message, state: FSMContext):
+
+    if msg.text == "❌ Отменить настройку":
+        await cancel_recording(msg, state)
+        return
+
     db_url = msg.text.strip()
 
     # Проверяем, что ссылка на базу данных соответствует ожидаемому формату
     match = re.match(DB_ID_PATTERN, db_url)
     if not match:
-        await msg.answer("⚠️ Неверный формат ID базы данных. Пожалуйста, отправьте корректную ссылку.")
+        await msg.answer("⚠️ Неверный формат ID базы данных. Пожалуйста, отправьте корректную ссылку",
+                     reply_markup=cancellation_button)
         return
 
     # Извлекаем ID базы данных
@@ -89,3 +103,10 @@ async def process_db_id(msg: Message, state: FSMContext):
     await msg.answer(f"✅ Спасибо! Ваши данные сохранены:\nAPI ключ: {api_key}\nID базы данных: {db_id}",
                      reply_markup=platform_button)
     await state.clear()
+
+
+# Обработчик кнопки "❌ Отменить настройку"
+@router.message(lambda message: message.text == "❌ Отменить настройку")
+async def cancel_recording(message: types.Message, state: FSMContext):
+
+    await message.answer("❌ Вы отменили настройку. Но вы можете нажать на /start, чтобы начать занова")

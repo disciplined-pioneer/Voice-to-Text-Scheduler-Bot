@@ -76,5 +76,4 @@ def add_event(name: str, start_date: str = None, end_date: str = None,
     if response.status_code != 200:
         return False
 
-    print("✅ Событие успешно добавлено!")
-    return True  # Возвращаем True при успешном добавлении события
+    return True

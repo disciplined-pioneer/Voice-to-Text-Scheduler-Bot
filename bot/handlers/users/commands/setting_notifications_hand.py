@@ -5,8 +5,9 @@ from aiogram.filters import Command
 from aiogram import F, types, Router
 from aiogram.fsm.context import FSMContext
 
+from db.psql.models.crud import UserChecker
 from db.psql.models.models import SessionFactory, UserAlerts
-from bot.templates.user.menu import platform_button, alerts_cancellation_button
+from bot.templates.user.menu import platform_button, cancellation_button
 from bot.templates.user.setting_notifications_temp import (
     notification_text, NotificationState, invalid_time_format_message
 )
@@ -20,9 +21,15 @@ session = SessionFactory()
 @router.message(F.text == "🔔 Настроить уведомления")
 async def notification_processing(msg: Message, state: FSMContext):
 
+    tg_id = msg.from_user.id
+    checker = UserChecker(tg_id)
+    if not checker.user_exists():
+        await msg.reply("❌ В доступе отказано, вы не предоставили ключи для подключения к Notion!")
+        return
+
     # Переходим в состояние ожидания ввода времени
     await msg.reply(notification_text,
-                     reply_markup=alerts_cancellation_button,
+                     reply_markup=cancellation_button,
                      parse_mode='HTML')
     
     await state.set_state(NotificationState.waiting_for_time)
@@ -72,15 +79,20 @@ async def process_time(msg: Message, state: FSMContext):
         await state.clear()
     else:
         await msg.answer(invalid_time_format_message,
-                         reply_markup=alerts_cancellation_button,)
+                         reply_markup=cancellation_button)
 
 
 # Обработчик кнопки "❌ Отменить настройку"
 @router.message(lambda message: message.text == "❌ Отменить настройку")
 async def cancel_recording(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
 
-    # Если мы находимся в нужном состоянии (ожидание ввода времени)
+    tg_id = message.from_user.id
+    checker = UserChecker(tg_id)
+    if not checker.user_exists():
+        await message.reply("❌ В доступе отказано, вы не предоставили ключи для подключения к Notion!")
+        return
+    
+    current_state = await state.get_state()
     if current_state == NotificationState.waiting_for_time:
 
         await message.chat.delete_message(message_id=message.message_id - 1)
