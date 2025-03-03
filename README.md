@@ -49,9 +49,9 @@
 ```
 TOKEN = ''  # Токен бота
 API_KEY_LLM = ''  # API-ключ модели LLM
-NOTION_API_KEY = ''  # API-ключ для интеграции с Notion
-DATABASE_ID = ''  # ID базы данных Notion
+
 ADMIN_LIST = []  # Список администраторов
+
 USER_NAME = ''  # Имя пользователя для БД
 PASSWORD_PSQL = ''  # Пароль для PostgreSQL
 PORT = ''  # Порт БД
