@@ -1,10 +1,10 @@
 import os
 from dotenv import load_dotenv
 
-# Загружаем переменные окружения из .env
+# Загрука переменных
 load_dotenv()
 
-# Теперь вы можете получить переменные с помощью os.getenv()
+# Получение данных из .env
 TOKEN = os.getenv("TOKEN")
 API_KEY_LLM = os.getenv("API_KEY_LLM")
 ADMIN_LIST = os.getenv("ADMIN_LIST")
