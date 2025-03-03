@@ -104,8 +104,8 @@ DB_NAME = ''  # Название базы данных
 ## Установка и запуск
 1. **Клонируйте репозиторий**
    ```sh
-   git clone https://github.com/your-repo.git
-   cd your-repo
+   https://github.com/disciplined-pioneer/Voice-to-Text-Scheduler-Bot.git
+   cd Voice-to-Text-Scheduler-Bot
    ```
 2. **Создайте виртуальное окружение и установите зависимости**
    ```sh
@@ -119,3 +119,4 @@ DB_NAME = ''  # Название базы данных
    ```sh
    python bot.py
    ```
+5. **Папка 'data' и её содержимое будет создано при обработке аудиио. Она хранит временные файлы для голосовых сообщений и чатов пользователей**
